@@ -1,4 +1,5 @@
 import * as esbuild from 'esbuild-wasm';
+import axios from 'axios';
 
 export const unpkgPathPlugin = () => {
     return {
@@ -16,7 +17,6 @@ export const unpkgPathPlugin = () => {
 
             build.onLoad({ filter: /.*\.js/ }, async (args: any) => {
                 console.log('onLoad', args);
-
                 if (args.path === 'index.js') {
                     return {
                         loader: 'jsx',
@@ -30,12 +30,10 @@ export const unpkgPathPlugin = () => {
 
             build.onLoad({ filter: /.*/ }, async (args: any) => {
                 console.log('onLoad', args);
-
+                const { data } = await axios.get(args.path);
                 return {
                     loader: 'jsx',
-                    contents: `
-                        export default 'Henlo';
-                    `,
+                    contents: data,
                 };
             });
         },
