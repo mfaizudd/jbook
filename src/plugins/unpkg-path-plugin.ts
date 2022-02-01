@@ -11,6 +11,12 @@ export const unpkgPathPlugin = () => {
             });
 
             build.onResolve({ filter: /.*/ }, async (args: any) => {
+                if (args.path.includes('./') || args.path.includes('../')) {
+                    return {
+                        path: new URL(args.path, args.importer + '/').href,
+                        namespace: 'a',
+                    }
+                }
                 const unpkgPath = `https://unpkg.com/${args.path}`;
                 return { path: unpkgPath, namespace: 'a' };
             })
@@ -21,7 +27,7 @@ export const unpkgPathPlugin = () => {
                     return {
                         loader: 'jsx',
                         contents: `
-                            import message from 'tiny-test-pkg';
+                            const message = require('medium-test-pkg');
                             console.log(message);
                         `,
                     };
