@@ -50,6 +50,9 @@ const App = () => {
             <pre>
                 {code}
             </pre>
+            <iframe sandbox='' src="/index.html" title='sandbox'>
+
+            </iframe>
         </div>
     );
 };
