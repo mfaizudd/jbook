@@ -7,7 +7,7 @@ import { unpkgPathPlugin } from './plugins/unpkg-path-plugin';
 const App = () => {
     const [input, setInput] = useState('');
     const [code, setCode] = useState('');
-    const ref = useRef<any>();
+    const ref = useRef<esbuild.Service>();
 
     const startService = async () => {
         ref.current = await esbuild.startService({

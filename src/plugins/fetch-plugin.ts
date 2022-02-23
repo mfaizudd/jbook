@@ -10,8 +10,13 @@ export const fetchPlugin = (inputCode: string) => {
     return {
         name: 'fetch-plugin',
         setup(build: esbuild.PluginBuild) {
-            build.onLoad({ filter: /\.css$/ }, async (args: any) => {
-                console.log('onLoadCss', args);
+            build.onLoad({ filter: /^index.js$/ }, () => {
+                return {
+                    loader: 'jsx',
+                    contents: inputCode,
+                };
+            })
+            build.onLoad({ filter: /\.css$/ }, async (args: esbuild.OnLoadArgs) => {
                 const cachedResult = await fileCache.getItem<esbuild.OnLoadResult>(args.path);
                 if (cachedResult) {
                     return cachedResult;
@@ -21,8 +26,8 @@ export const fetchPlugin = (inputCode: string) => {
                     .replace(/\n/g, '')
                     .replace(/"/g, '\\"')
                     .replace(/'/g, "\\'");
-                
-                const contents = 
+
+                const contents =
                     `
                         const style = document.createElement('style');
                         style.innerText = '${escaped}';
@@ -39,14 +44,7 @@ export const fetchPlugin = (inputCode: string) => {
                 return result;
             });
 
-            build.onLoad({ filter: /.*/ }, async (args: any) => {
-                console.log('onLoad', args);
-                if (args.path === 'index.js') {
-                    return {
-                        loader: 'jsx',
-                        contents: inputCode,
-                    };
-                }
+            build.onLoad({ filter: /.*/ }, async (args: esbuild.OnLoadArgs) => {
                 const cachedResult = await fileCache.getItem<esbuild.OnLoadResult>(args.path);
                 if (cachedResult) {
                     return cachedResult;
