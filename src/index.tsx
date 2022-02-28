@@ -12,7 +12,7 @@ const App = () => {
     const startService = async () => {
         ref.current = await esbuild.startService({
             worker: true,
-            wasmURL: 'https://unpkg.com/esbuild-wasm/esbuild.wasm'
+            wasmURL: 'https://unpkg.com/esbuild-wasm@0.8.27/esbuild.wasm'
         });
     };
 
@@ -50,12 +50,14 @@ const App = () => {
             <pre>
                 {code}
             </pre>
-            <iframe sandbox='' src="/index.html" title='sandbox'>
-
-            </iframe>
+            <iframe sandbox='' srcDoc={html} title='sandbox' />
         </div>
     );
 };
+
+const html = `
+<h1>Test</h1>
+`
 
 ReactDOM.render(
     <App />,
