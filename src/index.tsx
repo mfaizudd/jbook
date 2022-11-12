@@ -5,8 +5,8 @@ import { fetchPlugin } from './plugins/fetch-plugin';
 import { unpkgPathPlugin } from './plugins/unpkg-path-plugin';
 
 const App = () => {
+    const iframe = useRef<HTMLIFrameElement>(null)
     const [input, setInput] = useState('');
-    const [code, setCode] = useState('');
     const ref = useRef<esbuild.Service>();
 
     const startService = async () => {
@@ -25,6 +25,10 @@ const App = () => {
             return;
         }
 
+        if (iframe.current) {
+            iframe.current.srcdoc = html;
+        }
+
         const result = await ref.current.build({
             entryPoints: ['index.js'],
             bundle: true,
@@ -36,28 +40,39 @@ const App = () => {
             }
         });
 
-        // console.log(result);
-        
-        setCode(result.outputFiles[0].text);
+        iframe.current?.contentWindow?.postMessage(result.outputFiles[0].text, '*');
     };
+    const html = `
+        <html>
+            <head></head>
+            <body>
+                <div id="root"></div>
+                <script>
+                    window.addEventListener('message', e => {
+                        try {
+                            eval(e.data);
+                        } catch(err) {
+                            const root = document.querySelector('#root');
+                            root.innerHTML = '<div style="color:red"><h1>Runtime error:</h1>'+err+'</div>';
+                            throw err;
+                        }
+                    }, false);
+                </script>
+            </body>
+        </html>
+    `;
 
     return (
         <div>
-            <textarea value={input} onChange={e=>setInput(e.target.value)}></textarea>
+            <textarea value={input} onChange={e => setInput(e.target.value)}></textarea>
             <div>
                 <button onClick={onClick} type="submit">Submit</button>
             </div>
-            <pre>
-                {code}
-            </pre>
-            <iframe sandbox='' srcDoc={html} title='sandbox' />
+            <iframe ref={iframe} sandbox='allow-scripts' srcDoc={html} title='sandbox' />
         </div>
     );
 };
 
-const html = `
-<h1>Test</h1>
-`
 
 ReactDOM.render(
     <App />,
